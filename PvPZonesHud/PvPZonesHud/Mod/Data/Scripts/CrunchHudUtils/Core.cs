@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using PvPZonesHud.Data.Scripts.PvPArea;
+using CrunchHudUtils.Data.Scripts.PvPArea;
 using Sandbox.Definitions;
 using Sandbox.Game;
 using Sandbox.Game.World;
@@ -79,7 +79,7 @@ namespace Crunch
 
             try
             {
-                var data = MyAPIGateway.Utilities.SerializeFromBinary<PlayerDataPvP>(message);
+                var data = MyAPIGateway.Utilities.SerializeFromBinary<Data>(message);
 				if (HudModule == null){
 					HudModule = new TextHudModule();
 					 HudModule.Init();

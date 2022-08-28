@@ -117,10 +117,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Mod\Data\Scripts\PvPArea\Core.cs" />
-    <Compile Include="Mod\Data\Scripts\PvPArea\Data.cs" />
-    <Compile Include="Mod\Data\Scripts\PvPArea\HudAPIv2.cs" />
-    <Compile Include="Mod\Data\Scripts\PvPArea\TextHudModule.cs" />
+    <Compile Include="Mod\Data\Scripts\CrunchHudUtils\Core.cs" />
+    <Compile Include="Mod\Data\Scripts\CrunchHudUtils\Data.cs" />
+    <Compile Include="Mod\Data\Scripts\CrunchHudUtils\HudAPIv2.cs" />
+    <Compile Include="Mod\Data\Scripts\CrunchHudUtils\TextHudModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
