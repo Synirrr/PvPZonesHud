@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using PvPZonesHud.Mod.Data.Scripts.CrunchHudUtils;
 using Sandbox.Definitions;
 using Sandbox.Game;
 using Sandbox.Game.World;
@@ -12,6 +11,7 @@ using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using VRage.Scripting;
 using VRage.Utils;
+using VRageMath;
 
 namespace Crunch
 {
@@ -102,6 +102,10 @@ namespace Crunch
                         {
 
                         }
+                        else
+                        {
+
+                        }
                         break;
                 }
 
@@ -167,18 +171,26 @@ namespace Crunch
 		}
 
 
-		/*
-		 * UpdateAfterSimulation
-		 * 
-		 * UpdateAfterSimulation override
-		 */
+        /*
+         * UpdateAfterSimulation
+         * 
+         * UpdateAfterSimulation override
+         */
 		public override void UpdateAfterSimulation()
 		{
-			TickCounter += 1;
-			//i dont do anything with this
+            if (TickCounter % 720 == 0) // Check if player is in an area every 12 seconds
+            {
+                foreach (var area in from area in PlayerData.PvPAreas let player = MyAPIGateway.Session.LocalHumanPlayer let position = player.GetPosition() where Vector3D.Distance(position, area.Position) < area.Distance select area)
+                {
+                    // Change the Hud Text
+
+                }
+            }
+
+            TickCounter += 1;
 		}
 
-		public override void UpdatingStopped()
+		protected override void UnloadData()
 		{
 			MyAPIGateway.Multiplayer.UnregisterSecureMessageHandler(8544, MessageHandler);
 		}

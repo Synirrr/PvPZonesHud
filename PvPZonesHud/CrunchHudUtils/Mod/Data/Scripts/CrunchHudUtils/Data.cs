@@ -2,7 +2,7 @@
 using ProtoBuf;
 using VRageMath;
 
-namespace CrunchHudUtils.Mod.Data.Scripts.CrunchHudUtils
+namespace Crunch
 {
     [ProtoContract]
     public class PlayerDataPvP
