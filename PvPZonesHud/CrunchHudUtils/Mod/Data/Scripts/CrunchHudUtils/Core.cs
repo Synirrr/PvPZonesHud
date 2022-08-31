@@ -64,65 +64,78 @@ namespace Crunch
 		   MyAPIGateway.Multiplayer.RegisterSecureMessageHandler(8544, MessageHandler);
 		}
 
-		private void MessageHandler(ushort handlerId, byte[] message, ulong steamId, bool isServer)
-		{
+        private void MessageHandler(ushort handlerId, byte[] message, ulong steamId, bool isServer)
+        {
 
-			try
-			{
-				if (HudModule == null)
-				{
-					HudModule = new TextHudModule();
-					HudModule.Init();
-				}
-				if (!HudModule.HudInit)
-				{
-					HudModule.Init();
-				}
-				var data = MyAPIGateway.Utilities.SerializeFromBinary<object>(message);
-				switch (data)
+            try
+            {
+                if (HudModule == null)
                 {
-                    case ChatStatus status:
-                        if (status.ChatEnabled)
-                        {
-                            HudModule.SetStatus(true);
-                            HudModule.SetInfo(true);
-                        }
-                        else
-                        {
-                            HudModule.SetStatus(true);
-                            HudModule.SetInfo(false);
-                        }
-
-						break;
-                    case PlayerDataPvP playerData:
-                        PlayerData = playerData;
-                        break;
-                    case PvPArea areaData:
-                        if (PlayerData != null)
-                        {
-
-                        }
-                        else
-                        {
-
-                        }
-                        break;
+                    HudModule = new TextHudModule();
+                    HudModule.Init();
                 }
 
+                if (!HudModule.HudInit)
+                {
+                    HudModule.Init();
+                }
 
+                var data = MyAPIGateway.Utilities.SerializeFromBinary<object>(message);
+                switch (data.GetType().Name)
+                {
+                    case nameof(ChatStatus):
+                    {
+                        var status = (ChatStatus)data;
 
+                        if (status.ChatEnabled)
+                        {
+                            HudModule.SetChatStatus(true);
+                            HudModule.SetChatInfo(true);
+                        }
+                        else
+                        {
+                            HudModule.SetChatStatus(true);
+                            HudModule.SetChatInfo(false);
+                        }
 
+                        break;
+                    }
+                    case nameof(PlayerDataPvP):
+                    {
+                        var playerData = (PlayerDataPvP)data;
+                        PlayerData = playerData;
+                        break;
+                    }
+                    // Used as a way to replace areas that have been modified
+                    case nameof(PvPArea):
+                    {
+                        var areaData = (PvPArea)data;
+                        if (PlayerData != null)
+                        {
+                            var tempData = PlayerData;
+                            foreach (var area in PlayerData.PvPAreas.Where(area => area.Name.Equals(areaData.Name)))
+                            {
+                                tempData.PvPAreas.Remove(area);
+                                tempData.PvPAreas.Add(areaData);
+                            }
 
-			}
-			catch (Exception e)
-			{
-				MyLog.Default.WriteLineAndConsole($"{e.Message}\n{e.StackTrace}");
+                            PlayerData = tempData;
+                        }
 
-				if (MyAPIGateway.Session?.Player != null)
-					MyAPIGateway.Utilities.ShowNotification($"[ ERROR: {GetType().FullName}: {e.Message} | Send SpaceEngineers.Log to mod author ]", 10000, MyFontEnum.Red);
-			}
-			
-		}
+                        break;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                MyLog.Default.WriteLineAndConsole($"{e.Message}\n{e.StackTrace}");
+
+                if (MyAPIGateway.Session?.Player != null)
+                    MyAPIGateway.Utilities.ShowNotification(
+                        $"[ ERROR: {GetType().FullName}: {e.Message} | Send SpaceEngineers.Log to mod author ]", 10000,
+                        MyFontEnum.Red);
+            }
+        }
 		/*
 		 * UpdateBeforeSimulation
 		 * 
@@ -164,11 +177,11 @@ namespace Crunch
 				//TODO: Why not before everything else?
 				base.UpdateBeforeSimulation();
 			}
-			catch (Exception ex)
-			{
-
-			}
-		}
+            catch (Exception ex)
+            {
+                // ignored
+            }
+        }
 
 
         /*
@@ -178,12 +191,22 @@ namespace Crunch
          */
 		public override void UpdateAfterSimulation()
 		{
-            if (TickCounter % 720 == 0) // Check if player is in an area every 12 seconds
+            if (TickCounter % 600 == 0) // Check if player is in an area every 10 seconds
             {
-                foreach (var area in from area in PlayerData.PvPAreas let player = MyAPIGateway.Session.LocalHumanPlayer let position = player.GetPosition() where Vector3D.Distance(position, area.Position) < area.Distance select area)
+                if (PlayerData != null)
                 {
-                    // Change the Hud Text
-
+                    foreach (var area in from area in PlayerData.PvPAreas
+                             let player = MyAPIGateway.Session.LocalHumanPlayer
+                             let position = player.GetPosition()
+                             where Vector3D.Distance(position, area.Position) < area.Distance
+                             select area)
+                    {
+                        // Change the Hud Text
+                        // Set PvP Area Name
+                        HudModule.SetAreaName(area.Name);
+                        // Set PvP Area PvP Enabled
+                        HudModule.SetAreaPvPEnabled(area.AreaForcesPvP);
+                    }
                 }
             }
 
